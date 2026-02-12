@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Valentine Game</title>
+    <style>
+        :root {
+            --animation-duration: 5s; /* default duration */
+        }
+        .animated-element {
+            animation: bounce var(--animation-duration) infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-30px);
+            }
+            60% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-element">Valentine Game</div>
+    <input type="range" id="speedMultiplier" min="0.5" max="2" step="0.1" value="1">
+    <script>
+        const speedMultiplierInput = document.getElementById('speedMultiplier');
+        const root = document.documentElement;
+
+        speedMultiplierInput.addEventListener('input', function() {
+            const speedMultiplier = this.value;
+            const newDuration = 5 / speedMultiplier; // default duration is 5 seconds 
+            root.style.setProperty('--animation-duration', newDuration + 's');
+        });
+    </script>
+</body>
+</html>
