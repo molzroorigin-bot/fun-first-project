@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เกมสุ่มอั่งเปา - Advance Animation</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Kanit', sans-serif;
+    background: radial-gradient(circle at top, #ff2e2e, #7a0000);
+    color: white;
+    text-align: center;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .container { padding: 40px 20px; }
+
+  .envelopes-wrapper {
+    position: relative;
+    height: 200px;
+    max-width: 600px;
+    margin: 80px auto;
+    display: flex;
+    justify-content: center;
+    perspective: 1000px;
+  }
+
+  .envelope {
+    font-size: 80px;
+    cursor: pointer;
+    position: absolute; /* ใช้ Absolute เพื่อให้เลื่อนตำแหน่งตามพิกัดได้อิสระ */
+    transition: all 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    user-select: none;
+    z-index: 1;
+  }
+
+  /* เอฟเฟกต์ตอนกำลังสลับ ให้ซองที่เคลื่อนที่ดูมีมิติ */
+  .moving {
+    z-index: 2;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+  }
+
+  .status {
+    font-size: 22px;
+    margin-bottom: 10px;
+    height: 30px;
+  }
+
+  .result {
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffd700;
+    margin-top: 20px;
+  }
+
+  .won {
+    transform: scale(1.4) rotateY(720deg) !important;
+    z-index: 10 !important;
+    filter: drop-shadow(0 0 30px gold) !important;
+  }
+
+  button {
+    background: gold; border: none; padding: 10px 25px;
+    border-radius: 25px; font-family: 'Kanit'; font-weight: bold;
+    cursor: pointer; margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🧧 เฮง เฮง เฮง</h1>
+  <div id="status" class="status">รอสักครู่...</div>
+
+  <div class="envelopes-wrapper" id="wrap">
+    <div class="envelope" data-pos="0">🧧</div>
+    <div class="envelope" data-pos="1">🧧</div>
+    <div class="envelope" data-pos="2">🧧</div>
+    <div class="envelope" data-pos="3">🧧</div>
+  </div>
+
+  <div id="result" class="result"></div>
+  <button id="resetBtn" style="display:none;">เริ่มใหม่</button>
+</div>
+
+<script>
+const wrap = document.getElementById("wrap");
+const envelopes = Array.from(document.querySelectorAll(".envelope"));
+const status = document.getElementById("status");
+const resultText = document.getElementById("result");
+
+// ตั้งค่าตำแหน่งเริ่มต้น (Spacing)
+const spacing = 120; 
+let positions = [-1.5, -0.5, 0.5, 1.5].map(mult => mult * spacing);
+let currentMapping = [0, 1, 2, 3]; // เก็บว่าซองไหนอยู่ตำแหน่งไหน
+
+function updateLayout() {
+  envelopes.forEach((el, index) => {
+    const posIndex = currentMapping[index];
+    const xPos = positions[posIndex];
+    // เพิ่มการยกตัวเล็กน้อย (Y) และการเอียง (Rotate) ตามตำแหน่ง
+    el.style.transform = `translateX(${xPos}px) rotate(${xPos/20}deg)`;
+  });
+}
+
+function shuffle() {
+  // สุ่มสลับ Index ใน currentMapping
+  for (let i = currentMapping.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [currentMapping[i], currentMapping[j]] = [currentMapping[j], currentMapping[i]];
+  }
+  
+  envelopes.forEach(el => el.classList.add('moving'));
+  updateLayout();
+  
+  setTimeout(() => {
+    envelopes.forEach(el => el.classList.remove('moving'));
+  }, 400);
+}
+
+let shuffleCount = 0;
+const maxShuffles = 15;
+
+function startGame() {
+  status.innerText = "กำลังสลับซอง...";
+  const interval = setInterval(() => {
+    shuffle();
+    shuffleCount++;
+    if (shuffleCount >= maxShuffles) {
+      clearInterval(interval);
+      status.innerText = "เลือกซองนำโชคของคุณ! 🎯";
+      enableClick();
+    }
+  }, 500);
+}
+
+function enableClick() {
+  envelopes.forEach(el => {
+    el.onclick = () => {
+      if (resultText.innerText !== "") return;
+      
+      const prize = [88, 168, 888, 1688, 999][Math.floor(Math.random()*5)];
+      el.classList.add('won');
+      resultText.innerText = `ยินดีด้วย! ได้รับ ${prize} บาท`;
+      status.innerText = "เฮงๆ รวยๆ!";
+      document.getElementById("resetBtn").style.display = "inline-block";
+    };
+  });
+}
+
+document.getElementById("resetBtn").onclick = () => location.reload();
+
+// เริ่มต้นวางตำแหน่ง
+updateLayout();
+setTimeout(startGame, 1000);
+
+</script>
+</body>
+</html>
