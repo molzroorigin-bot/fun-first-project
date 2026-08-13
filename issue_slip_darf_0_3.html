@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --paper:#f3ecd6;
+    --paper-edge:#e6dcb8;
+    --ink:#1c2b4a;
+    --ink-soft:#2c3f66;
+    --rule:#1c2b4a;
+    --red:#b5322c;
+    --highlight:#bfe08a;
+    --hole:#cbbf94;
+    --hole-shadow:#a89a68;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    padding:32px 12px;
+    background:
+      radial-gradient(circle at 20% 10%, #e9e2c9 0%, #d8cfae 60%, #c9bf9a 100%);
+    font-family:'Sarabun', sans-serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .toolbar{
+    width:100%;
+    max-width:760px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .toolbar button{
+    font-family:'Sarabun', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    padding:9px 18px;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .toolbar button.primary{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .toolbar button:hover{ opacity:.85; }
+
+  /* ===== the slip ===== */
+  .slip-wrap{
+    position:relative;
+    width:100%;
+    max-width:760px;
+    background:var(--paper);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+    padding:26px 46px;
+    box-shadow: 0 18px 40px -12px rgba(20,15,5,0.45), 0 0 0 1px rgba(0,0,0,.05);
+    clip-path: polygon(0% 1%, 2% 0%, 98% 0.5%, 100% 2%, 99.3% 98%, 97% 100%, 3% 99.5%, 0.5% 97%);
+  }
+
+  .holes{
+    position:absolute;
+    top:14px; bottom:14px;
+    width:26px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .holes.left{ left:8px; }
+  .holes.right{ right:8px; }
+  .holes span{
+    display:block;
+    width:11px; height:11px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #fbf6e3, var(--hole) 55%, var(--hole-shadow) 100%);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.35);
+  }
+
+  .slip{
+    position:relative;
+  }
+
+  .brand-row{
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .brand-name{
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+    letter-spacing:.5px;
+  }
+  .brand-phone{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+
+  .doc-no{
+    position:absolute;
+    top:-6px; right:0;
+    text-align:right;
+    font-size:13px;
+  }
+  .doc-no .lbl{ color:var(--ink); margin-right:4px;}
+  .doc-no input{
+    font-family:'Space Mono', monospace;
+    font-weight:700;
+    font-size:14px;
+    background:var(--highlight);
+    border:none;
+    padding:2px 6px;
+    width:120px;
+    text-align:center;
+  }
+
+  .title-row{
+    text-align:center;
+    font-size:17px;
+    font-weight:700;
+    border-top:1.5px solid var(--rule);
+    border-bottom:1.5px solid var(--rule);
+    padding:5px 0;
+    margin:10px 0 0 0;
+  }
+
+  table.frame{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:0;
+  }
+  table.frame td{
+    border:1px solid var(--rule);
+    border-top:none;
+    padding:5px 8px;
+    font-size:13px;
+    vertical-align:middle;
+  }
+  table.frame tr:first-child td{ border-top:1px solid var(--rule); }
+
+  .flabel{
+    color:var(--ink-soft);
+    font-size:12.5px;
+    display:block;
+    margin-bottom:2px;
+  }
+
+  input, .fld{
+    font-family:'Sarabun', sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    line-height:1.6;
+    color:var(--ink);
+    border:none;
+    background:transparent;
+    width:100%;
+    padding:2px 0;
+  }
+  input:focus{ outline:1px dashed var(--ink-soft); background:#fffef4; }
+  input.hl{ background:var(--highlight); padding:2px 4px; }
+  input[type="date"]{ cursor:pointer; }
+  input#prodName{ font-size:13.5px; }
+
+  .date-field{ position:relative; }
+  .date-field input#issueDate{
+    position:relative;
+    width:100%;
+    color:transparent;
+    background:var(--highlight);
+    caret-color:transparent;
+  }
+  .date-field input#issueDate::-webkit-datetime-edit,
+  .date-field input#issueDate::-webkit-datetime-edit-fields-wrapper,
+  .date-field input#issueDate::-webkit-datetime-edit-text,
+  .date-field input#issueDate::-webkit-datetime-edit-month-field,
+  .date-field input#issueDate::-webkit-datetime-edit-day-field,
+  .date-field input#issueDate::-webkit-datetime-edit-year-field{
+    color:transparent;
+  }
+  .date-field .date-display{
+    position:absolute;
+    left:4px; top:50%;
+    transform:translateY(-50%);
+    pointer-events:none;
+    font-family:'Sarabun', sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .center{ text-align:center; }
+
+  /* ===== autocomplete ===== */
+  .ac-wrap{ position:relative; }
+  .ac-menu{
+    display:none;
+    position:absolute;
+    left:0; right:0; top:100%;
+    z-index:50;
+    background:#fffef4;
+    border:1px solid var(--ink-soft);
+    box-shadow:0 8px 18px -6px rgba(0,0,0,.35);
+    max-height:180px;
+    overflow-y:auto;
+    text-align:left;
+  }
+  .ac-item{
+    padding:6px 8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ac-item:hover, .ac-item.active{ background:var(--highlight); }
+  .ac-empty{
+    padding:6px 8px;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+
+  .bottom-row{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns:1.35fr 1fr;
+    gap:16px;
+    align-items:start;
+  }
+
+  .terms-col{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .concrete-box{
+    border:1.3px solid var(--rule);
+    padding:8px 10px 6px;
+    font-size:12.5px;
+    background:transparent;
+  }
+  .cb-title{
+    font-weight:700;
+    font-size:13.5px;
+    margin-bottom:5px;
+  }
+  .cb-checks{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:3px;
+  }
+  .cb-checks label{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .cb-checks input[type="checkbox"]{
+    width:14px; height:14px;
+    accent-color:var(--ink);
+    cursor:pointer;
+  }
+  .cb-checks .cb-val{
+    margin-left:auto;
+    border:none;
+    background:transparent;
+    color:#2452a3;
+    font-style:italic;
+    font-weight:700;
+    text-align:right;
+    width:80px;
+    padding:0;
+  }
+  .cb-line{
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+    border-bottom:1px dotted var(--ink-soft);
+    padding:4px 0 3px;
+  }
+  .cb-line .cb-label{
+    white-space:nowrap;
+    font-weight:600;
+    font-size:12.5px;
+  }
+  .cb-line input{
+    flex:1;
+    min-width:10px;
+    border:none;
+    background:transparent;
+    color:#2452a3;
+    font-style:italic;
+    font-weight:700;
+    padding:0 0 0 4px;
+  }
+  .cb-line input:focus{ outline:none; }
+
+  .terms{
+    font-size:11.5px;
+    line-height:1.65;
+    background:var(--highlight);
+    color:var(--ink);
+  }
+  .terms .t-title{
+    font-weight:700;
+    margin-bottom:3px;
+  }
+  .terms ol{
+    margin:0;
+    padding-left:18px;
+  }
+  .terms li{ margin-bottom:1px; }
+  .terms li[contenteditable="true"]{ cursor:text; border-radius:2px; padding:0 2px; }
+  .terms li[contenteditable="true"]:focus{ outline:1px dashed var(--ink-soft); background:#fffef4; }
+  .terms li.strike{ text-decoration: line-through; color:#8a2b2b; }
+  .terms[contenteditable="true"]{ cursor:text; border-radius:3px; }
+  .terms[contenteditable="true"]:focus{ outline:1px dashed var(--ink-soft); background:#fffef4; }
+
+  .stamp{
+    position:absolute;
+    left:8px;
+    top:126px;
+    transform: rotate(-6deg);
+    color:var(--red);
+    font-weight:700;
+    text-align:center;
+    line-height:1.2;
+    font-size:15px;
+    border:2.5px solid var(--red);
+    padding:4px 10px;
+    border-radius:4px;
+    background:rgba(255,255,255,.35);
+  }
+
+  .sign-area{
+    margin-top:16px;
+    border:1px solid var(--rule);
+  }
+  .sign-top{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .sign-top .col{
+    padding:14px 14px 8px;
+    text-align:center;
+  }
+  .sign-top .col + .col{ border-left:1px solid var(--rule); }
+  .sign-top .line{
+    border-bottom:1px dotted var(--ink-soft);
+    height:26px;
+  }
+  .sign-top .role{
+    font-weight:700;
+    font-size:12.5px;
+    margin-top:6px;
+  }
+  .sign-note{
+    border-top:1px solid var(--rule);
+    padding:10px 14px;
+    font-size:11.5px;
+    line-height:1.65;
+    color:var(--ink);
+  }
+  .sign-bottom{
+    border-top:1px dotted var(--ink-soft);
+    margin:0 14px;
+    padding:10px 0 12px;
+    font-size:12.5px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .sign-bottom input{
+    border-bottom:1px dotted var(--ink-soft);
+    text-align:center;
+  }
+  .sign-bottom .role-label{
+    white-space:nowrap;
+    font-weight:700;
+  }
+  .sign-pad{
+    height:56px;
+    border-bottom:1px dotted var(--ink-soft);
+    margin:8px 0 6px;
+  }
+
+  /* ===== manage-database modal ===== */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(20,15,5,.55);
+    z-index:200;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    background:var(--paper);
+    width:100%;
+    max-width:640px;
+    max-height:86vh;
+    overflow-y:auto;
+    border-radius:6px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+    padding:20px 22px 24px;
+  }
+  .modal-box h2{
+    margin:0 0 12px;
+    font-size:18px;
+    color:var(--ink);
+  }
+  .modal-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .modal-tabs button{
+    font-family:'Sarabun', sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:14px;
+    border:1px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .modal-tabs button.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .modal-panel{ display:none; }
+  .modal-panel.active{ display:block; }
+  .db-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 8px;
+    border-bottom:1px solid var(--paper-edge);
+    font-size:13px;
+  }
+  .db-row .info{ flex:1; }
+  .db-row .sub{ color:var(--ink-soft); font-size:11.5px; }
+  .db-row button{
+    font-size:11.5px;
+    font-weight:700;
+    padding:4px 9px;
+    border-radius:3px;
+    border:1px solid var(--red);
+    background:#fff;
+    color:var(--red);
+    cursor:pointer;
+  }
+  .db-add{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1.5px solid var(--rule);
+  }
+  .db-add input{
+    font-family:'Sarabun', sans-serif;
+    font-size:13px;
+    padding:6px 8px;
+    border:1px solid var(--ink-soft);
+    background:#fffef4;
+    border-radius:3px;
+    flex:1;
+    min-width:120px;
+  }
+  .db-add button{
+    font-size:13px;
+    font-weight:700;
+    padding:7px 14px;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+  }
+  .modal-close{
+    margin-top:16px;
+    width:100%;
+    padding:9px;
+    font-family:'Sarabun', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+
+  /* ===== history modal ===== */
+  .hist-filters{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    margin-bottom:14px;
+  }
+  .hist-filters .fgroup{ display:flex; flex-direction:column; }
+  .hist-filters label{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:3px;
+  }
+  .hist-filters input{
+    font-family:'Sarabun', sans-serif;
+    font-size:13px;
+    padding:6px 8px;
+    border:1px solid var(--ink-soft);
+    background:#fffef4;
+    border-radius:3px;
+  }
+  .hist-filters button{
+    font-family:'Sarabun', sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    padding:7px 14px;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    height:34px;
+  }
+  .hist-row .sub{ color:var(--ink-soft); font-size:11.5px; margin-top:2px; }
+  .hist-row .btns{ display:flex; gap:6px; flex-shrink:0; }
+  .hist-row button.load{
+    font-size:11.5px;
+    font-weight:700;
+    padding:4px 9px;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .hist-empty{
+    padding:24px 8px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  table.summary-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  table.summary-table th, table.summary-table td{
+    border:1px solid var(--paper-edge);
+    padding:7px 9px;
+    text-align:left;
+  }
+  table.summary-table th{
+    background:var(--highlight);
+    font-weight:700;
+  }
+  table.summary-table td.num, table.summary-table th.num{
+    text-align:right;
+    font-family:'Space Mono', monospace;
+  }
+  table.summary-table tfoot td{
+    font-weight:700;
+    background:#fffef4;
+  }
+
+  @page{
+    /* Paper is 257mm x 364mm; printed in landscape, so the page box
+       is 364mm wide x 257mm tall (width/height swapped from the
+       portrait spec). */
+    size: 364mm 257mm;
+    margin: 10mm;
+  }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .toolbar{ display:none; }
+    .slip-wrap{ box-shadow:none; max-width:100%; }
+  }
+
+  @media (max-width:600px){
+    .slip-wrap{ padding:20px 18px; }
+    table.frame td{ display:block; width:100% !important; border-top:1px solid var(--rule) !important; }
+    table.frame tr{ display:block; }
+    .doc-no{ position:static; text-align:center; margin-bottom:8px; }
+    .bottom-row{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button onclick="openManage()">จัดการฐานข้อมูล</button>
+  <button onclick="openHistory()">ประวัติ / สรุปยอด</button>
+  <button onclick="saveRecordWithFeedback()">บันทึกรายการนี้</button>
+  <button onclick="clearAll()">ล้างข้อมูล</button>
+  <button class="primary" onclick="saveThenPrint()">พิมพ์ / บันทึกเป็น PDF</button>
+</div>
+
+<div class="slip-wrap" id="slipWrap">
+  <div class="holes left">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="holes right">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="slip">
+    <div class="brand-row">
+      <div class="brand-name" contenteditable="true">พูลวาณิชย์ 2022 คอนกรีต</div>
+      <div class="brand-phone" contenteditable="true">ที่อยู่: 179 ม.1 บ้านพระบาทนาหงส์ ต.พระบาทนาสิงห์ อ.รัตนวาปี จ.หนองคาย 43120 ติดต่อ: 081-9754227</div>
+    </div>
+
+    <div class="doc-no">
+      <span class="lbl">เลขที่</span><input class="hl" id="docNo" value="SN0026115">
+    </div>
+
+    <div class="title-row">ใบจ่ายสินค้า ISSUE SLIP</div>
+
+    <table class="frame">
+      <tr>
+        <td style="width:55%">
+          <span class="flabel">รหัสจ่ายสินค้า</span>
+          <input class="hl" id="issueCode" value="DV0026115">
+        </td>
+        <td style="width:45%">
+          <span class="flabel">วันที่จ่ายสินค้า</span>
+          <div class="date-field">
+            <input class="hl" id="issueDate" type="date" value="2026-08-09">
+            <span class="date-display" id="issueDateDisplay"></span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="flabel">ชื่อลูกค้า</span>
+          <input class="hl" id="custName" value="ทั่วไป" autocomplete="off">
+        </td>
+        <td>
+          <span class="flabel">สถานที่ส่งสินค้า</span>
+          <input class="hl" id="deliverLoc" value="ภายในจังหวัด" autocomplete="off">
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" style="padding:0;">
+          <table class="frame" style="border:none;">
+            <tr>
+              <td class="center" style="width:18%;"><span class="flabel">รหัสสินค้า</span></td>
+              <td class="center" style="width:44%;"><span class="flabel">รายการสินค้า</span></td>
+              <td class="center" style="width:19%;"><span class="flabel">จำนวน (ลบ.ม.)</span></td>
+              <td class="center" style="width:19%;"><span class="flabel">กำหนดชำระเงิน</span></td>
+            </tr>
+            <tr>
+              <td class="center"><input class="hl center" id="prodCode" value="ST280ก" style="text-align:center;" autocomplete="off"></td>
+              <td><input id="prodName" value="คอนกรีตกำลังอัด สำเร็จรูป" autocomplete="off"></td>
+              <td class="center"><input class="hl center" id="qty" value="6.00" style="text-align:center;"></td>
+              <td class="center"><input class="hl center" id="payTerm" value="เงินสด" style="text-align:center;" autocomplete="off"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="2" style="padding:0;">
+          <table class="frame" style="border:none;">
+            <tr>
+              <td class="center" style="width:16%;"><span class="flabel">ชื่อผู้ขนส่ง</span></td>
+              <td class="center" style="width:14%;"><span class="flabel">หมายเลขรถ</span></td>
+              <td class="center" style="width:18%;"><span class="flabel">พนักงานขับรถ</span></td>
+              <td class="center" style="width:13%;"><span class="flabel">เวลารถออก</span></td>
+              <td class="center" style="width:13%;"><span class="flabel">เวลาถึงหน้างาน</span></td>
+              <td class="center" style="width:13%;"><span class="flabel">เวลาเริ่มเท</span></td>
+              <td class="center" style="width:13%;"><span class="flabel">เวลาเทเสร็จ</span></td>
+            </tr>
+            <tr>
+              <td class="center"><input class="hl center" id="carrier" value="cop3" style="text-align:center;" autocomplete="off"></td>
+              <td class="center"><input class="hl center" id="truckNo" value="5" style="text-align:center;" autocomplete="off"></td>
+              <td class="center"><input class="hl center" id="driver" value="โชค 10 ล้อ" style="text-align:center;" autocomplete="off"></td>
+              <td class="center"><input class="hl center" id="tOut" value="13:31:44" style="text-align:center;"></td>
+              <td class="center"><input class="center" id="tArrive" value="" style="text-align:center;"></td>
+              <td class="center"><input class="center" id="tStart" value="" style="text-align:center;"></td>
+              <td class="center"><input class="center" id="tEnd" value="" style="text-align:center;"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <div class="bottom-row">
+      <div class="terms-col">
+        <div class="concrete-box">
+          <div class="cb-title">คอนกรีตผสมเสร็จ</div>
+          <div class="cb-checks">
+            <label><input type="checkbox" id="specCube" checked> Cube</label>
+            <label><input type="checkbox" id="specCylinder"> Cylinder</label>
+            <input class="cb-val" id="cbTopVal" value="280 ksc.">
+          </div>
+          <div class="cb-line">
+            <span class="cb-label">Compressive Strength</span>
+            <input id="cbStrength" value="28 วัน">
+          </div>
+          <div class="cb-line">
+            <span class="cb-label">Age at</span>
+            <input id="cbAge" value="">
+          </div>
+          <div class="cb-line">
+            <span class="cb-label">Slump</span>
+            <input id="cbSlump" value="7.5+/-2.5 cm.">
+          </div>
+        </div>
+
+        <div class="terms" contenteditable="true">
+        <div class="t-title">เงื่อนไข :</div>
+        <ol>
+          <li>รายการสินค้าข้างต้นทดสอบกำลังอัดด้วยตัวอย่างทรงลูกบาศก์</li>
+          <li>ค่ายุบตัวตามส่วนผสมที่กำหนดทดสอบเมื่อรถคอนกรีตถึงหน่วยงานของผู้ซื้อ</li>
+          <li>วิธีการเก็บตัวอย่างเพื่อทดสอบให้เป็นไปตามมาตรฐานASTM การประเมินตามผลมาตรฐาน ACI</li>
+          <li>หากได้รับคอนกรีตไม่ตรงตามจำนวนคิวที่ระบุในPOนี้โปรดแจ้งให้บริษัททราบทันที</li>
+          <li>ผู้ซื้อจะต้องอำนวยความสะดวก จัดเส้นทางเข้า-ออกเพื่อใช้ในการขนส่งคอนกรีตให้อยู่ในสภาพที่ดีและใช้งานได้โดยสะดวก หากมีข้อผิดพลาดในเส้นทางเข้าออก ผู้ซื้อจะเป็นผู้รับผิดชอบค่าใช้จ่ายที่เกิดขึ้น</li>
+          <li>กรณีเทคอนกรีตต่ำกว่า 2 คิว คิดค่าขนส่ง 300 บาท/เที่ยว ยกเว้นกรณีปิดแบบ</li>
+          <li>คอนกรีตจะต้องใช้ให้หมดภายในระยะเวลา 2.5 ชั่วโมง นับจากเวลาที่ออกจากหน่วยผลิต ถ้าเกิน คิดอัตราชั่วโมงละ 200 บาท</li>
+        </ol>
+        </div>
+      </div>
+
+      <div class="sign-area">
+        <div class="sign-top">
+          <div class="col">
+            <div class="line"></div>
+            <div class="role">ผู้จ่ายสินค้า</div>
+          </div>
+          <div class="col">
+            <div class="line"></div>
+            <div class="role">ผู้รับสินค้า</div>
+          </div>
+        </div>
+        <div class="sign-note">คอนกรีตผสมเสร็จจำนวนนี้ได้รับการผสมน้ำตามมาตรฐาน เว้นแต่ส่วนที่ถูกต้องแล้ว หากท่านเติมน้ำเพื่อให้คอนกรีตเหลว ทางบริษัทฯ จะไม่รับผิดชอบต่อความเสียหายที่อาจเกิดขึ้นกับงานก่อสร้างของท่าน และขอให้ท่านลงนามเพื่อรับผิดชอบในการสั่งเติมน้ำครั้งนี้ด้วย</div>
+        <div class="sign-bottom">
+          <span class="role-label">ลงชื่อ</span>
+          <input id="sig3" value="">
+          <span class="role-label">ผู้รับผิดชอบ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== manage-database modal ===== -->
+<div class="modal-overlay" id="dbModal">
+  <div class="modal-box">
+    <h2>จัดการฐานข้อมูล</h2>
+    <div class="modal-tabs" id="modalTabs"></div>
+    <div id="modalPanels"></div>
+    <button class="modal-close" onclick="closeManage()">ปิด</button>
+  </div>
+</div>
+
+<!-- ===== history / summary modal ===== -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal-box" style="max-width:820px;">
+    <h2>ประวัติการจ่ายสินค้า</h2>
+    <div class="hist-filters">
+      <div class="fgroup">
+        <label>จากวันที่</label>
+        <input type="date" id="histFrom" onchange="buildHistoryModal()">
+      </div>
+      <div class="fgroup">
+        <label>ถึงวันที่</label>
+        <input type="date" id="histTo" onchange="buildHistoryModal()">
+      </div>
+      <button onclick="clearHistFilter()">ล้างตัวกรอง</button>
+    </div>
+    <div class="modal-tabs" id="histTabs"></div>
+    <div id="histPanels"></div>
+    <button class="modal-close" onclick="closeHistory()">ปิด</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ฐานข้อมูล (เก็บไว้ใน localStorage ของเบราว์เซอร์เครื่องนี้)
+   ========================================================= */
+const DB_KEY = 'issueSlipDB_v1';
+
+const DEFAULT_DB = {
+  customers: [
+    { name:"ทั่วไป", deliverLoc:"ภายในจังหวัด", payTerm:"เงินสด" },
+    { name:"บริษัท เอบีซี ก่อสร้าง จำกัด", deliverLoc:"นอกจังหวัด", payTerm:"เงินเชื่อ" },
+    { name:"หจก. สยามวิศวกรรม", deliverLoc:"ภายในจังหวัด", payTerm:"โอนเงิน" },
+    { name:"คุณสมชาย รุ่งเรือง", deliverLoc:"ภายในจังหวัด", payTerm:"เงินสด" }
+  ],
+  locations: [ "ภายในจังหวัด", "นอกจังหวัด", "หน้างานโครงการ", "คลังสินค้าโรงงาน" ],
+  payTerms:  [ "เงินสด", "เงินเชื่อ", "โอนเงิน", "เช็ค 30 วัน" ],
+  products:  [
+    { code:"ST280ก", name:"คอนกรีตกำลังอัด สำเร็จรูป" },
+    { code:"ST240ข", name:"คอนกรีตกำลังอัด 240 ksc" },
+    { code:"ST320ก", name:"คอนกรีตกำลังอัดสูง 320 ksc" },
+    { code:"MT100", name:"มอร์ตาร์ฉาบสำเร็จรูป" }
+  ],
+  carriers:  [ "cop3", "cop5", "ทีมขนส่งภายนอก A" ],
+  drivers:   [ "โชค 10 ล้อ", "สมพงษ์ มั่นคง", "วีระ ใจดี" ],
+  trucks:    [ "5", "12", "20-กข 4521" ],
+  records:   []
+};
+
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(DB_KEY);
+    if(!raw) return JSON.parse(JSON.stringify(DEFAULT_DB));
+    const parsed = JSON.parse(raw);
+    return Object.assign(JSON.parse(JSON.stringify(DEFAULT_DB)), parsed);
+  }catch(e){
+    return JSON.parse(JSON.stringify(DEFAULT_DB));
+  }
+}
+function saveDB(){ localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
+
+let DB = loadDB();
+
+/* =========================================================
+   ตัวช่วยสร้างช่อง "พิมพ์ค้นหา / กดเลือก" (autocomplete)
+   ========================================================= */
+function wrapInput(input){
+  const wrap = document.createElement('div');
+  wrap.className = 'ac-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const menu = document.createElement('div');
+  menu.className = 'ac-menu';
+  wrap.appendChild(menu);
+  return menu;
+}
+
+// รายการข้อความล้วน เช่น ผู้ขนส่ง / พนักงานขับรถ / ทะเบียนรถ / สถานที่ / เงื่อนไขชำระเงิน
+function attachSimpleCombo(input, listKey){
+  const menu = wrapInput(input);
+
+  function render(){
+    const q = input.value.trim().toLowerCase();
+    const items = DB[listKey].filter(v => !q || v.toLowerCase().includes(q));
+    menu.innerHTML = '';
+    if(items.length === 0){
+      menu.innerHTML = '<div class="ac-empty">ไม่พบในฐานข้อมูล — พิมพ์เพื่อบันทึกเป็นรายการใหม่</div>';
+    }else{
+      items.slice(0, 10).forEach(v=>{
+        const opt = document.createElement('div');
+        opt.className = 'ac-item';
+        opt.textContent = v;
+        opt.onmousedown = (e)=>{ e.preventDefault(); input.value = v; menu.style.display='none'; };
+        menu.appendChild(opt);
+      });
+    }
+    menu.style.display = 'block';
+  }
+
+  input.addEventListener('focus', render);
+  input.addEventListener('input', render);
+  input.addEventListener('blur', ()=>{
+    setTimeout(()=>{ menu.style.display='none'; }, 150);
+    const v = input.value.trim();
+    if(v && !DB[listKey].includes(v)){
+      DB[listKey].push(v);
+      saveDB();
+    }
+  });
+}
+
+// ช่องลูกค้า: เลือกแล้วเติมสถานที่ส่ง/เงื่อนไขชำระเงินให้อัตโนมัติ
+function attachCustomerCombo(input, deliverLocEl, payTermEl){
+  const menu = wrapInput(input);
+
+  function render(){
+    const q = input.value.trim().toLowerCase();
+    const items = DB.customers.filter(c => !q || c.name.toLowerCase().includes(q));
+    menu.innerHTML = '';
+    if(items.length === 0){
+      menu.innerHTML = '<div class="ac-empty">ไม่พบในฐานข้อมูล — พิมพ์เพื่อบันทึกลูกค้าใหม่</div>';
+    }else{
+      items.slice(0, 10).forEach(c=>{
+        const opt = document.createElement('div');
+        opt.className = 'ac-item';
+        opt.textContent = c.name;
+        opt.onmousedown = (e)=>{
+          e.preventDefault();
+          input.value = c.name;
+          if(c.deliverLoc) deliverLocEl.value = c.deliverLoc;
+          if(c.payTerm) payTermEl.value = c.payTerm;
+          menu.style.display = 'none';
+        };
+        menu.appendChild(opt);
+      });
+    }
+    menu.style.display = 'block';
+  }
+
+  input.addEventListener('focus', render);
+  input.addEventListener('input', render);
+  input.addEventListener('blur', ()=>{
+    setTimeout(()=>{ menu.style.display='none'; }, 150);
+    const name = input.value.trim();
+    if(!name) return;
+    const existing = DB.customers.find(c => c.name === name);
+    if(existing){
+      existing.deliverLoc = deliverLocEl.value.trim() || existing.deliverLoc;
+      existing.payTerm = payTermEl.value.trim() || existing.payTerm;
+    }else{
+      DB.customers.push({ name, deliverLoc: deliverLocEl.value.trim(), payTerm: payTermEl.value.trim() });
+    }
+    saveDB();
+  });
+}
+
+// ช่องสินค้า (รหัส + ชื่อ) เลือกฝั่งใดฝั่งหนึ่งเติมให้ครบทั้งคู่
+function attachProductCombo(input, codeEl, nameEl){
+  const menu = wrapInput(input);
+
+  function render(){
+    const q = input.value.trim().toLowerCase();
+    const items = DB.products.filter(p => !q || p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
+    menu.innerHTML = '';
+    if(items.length === 0){
+      menu.innerHTML = '<div class="ac-empty">ไม่พบในฐานข้อมูล — พิมพ์เพื่อบันทึกสินค้าใหม่</div>';
+    }else{
+      items.slice(0, 10).forEach(p=>{
+        const opt = document.createElement('div');
+        opt.className = 'ac-item';
+        opt.textContent = p.code + ' — ' + p.name;
+        opt.onmousedown = (e)=>{
+          e.preventDefault();
+          codeEl.value = p.code;
+          nameEl.value = p.name;
+          fitProdNameText();
+          menu.style.display = 'none';
+        };
+        menu.appendChild(opt);
+      });
+    }
+    menu.style.display = 'block';
+  }
+
+  input.addEventListener('focus', render);
+  input.addEventListener('input', render);
+  input.addEventListener('blur', ()=>{
+    setTimeout(()=>{ menu.style.display='none'; }, 150);
+    const code = codeEl.value.trim();
+    const name = nameEl.value.trim();
+    if(!code || !name) return;
+    const existing = DB.products.find(p => p.code === code);
+    if(existing){ existing.name = name; }
+    else{ DB.products.push({ code, name }); }
+    saveDB();
+  });
+}
+
+/* =========================================================
+   เชื่อมช่องกรอกข้อมูลกับฐานข้อมูล
+   ========================================================= */
+function initCombos(){
+  const custName    = document.getElementById('custName');
+  const deliverLoc  = document.getElementById('deliverLoc');
+  const payTerm     = document.getElementById('payTerm');
+  const prodCode    = document.getElementById('prodCode');
+  const prodName    = document.getElementById('prodName');
+  const carrier     = document.getElementById('carrier');
+  const driver      = document.getElementById('driver');
+  const truckNo     = document.getElementById('truckNo');
+
+  attachCustomerCombo(custName, deliverLoc, payTerm);
+  attachSimpleCombo(deliverLoc, 'locations');
+  attachSimpleCombo(payTerm, 'payTerms');
+  attachProductCombo(prodCode, prodCode, prodName);
+  attachProductCombo(prodName, prodCode, prodName);
+  attachSimpleCombo(carrier, 'carriers');
+  attachSimpleCombo(driver, 'drivers');
+  attachSimpleCombo(truckNo, 'trucks');
+}
+
+/* =========================================================
+   หน้าต่างจัดการฐานข้อมูล
+   ========================================================= */
+const TAB_DEFS = [
+  { key:'customers', label:'ลูกค้า' },
+  { key:'products',  label:'สินค้า' },
+  { key:'carriers',  label:'ผู้ขนส่ง' },
+  { key:'drivers',   label:'พนักงานขับรถ' },
+  { key:'trucks',    label:'ทะเบียนรถ' },
+  { key:'payTerms',  label:'เงื่อนไขชำระเงิน' },
+  { key:'locations', label:'สถานที่ส่งสินค้า' }
+];
+let activeTab = 'customers';
+
+function openManage(){
+  buildModal();
+  document.getElementById('dbModal').classList.add('open');
+}
+function closeManage(){
+  document.getElementById('dbModal').classList.remove('open');
+}
+
+function buildModal(){
+  const tabsEl = document.getElementById('modalTabs');
+  const panelsEl = document.getElementById('modalPanels');
+  tabsEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+
+  TAB_DEFS.forEach(t=>{
+    const btn = document.createElement('button');
+    btn.textContent = t.label;
+    if(t.key === activeTab) btn.classList.add('active');
+    btn.onclick = ()=>{ activeTab = t.key; buildModal(); };
+    tabsEl.appendChild(btn);
+  });
+
+  TAB_DEFS.forEach(t=>{
+    const panel = document.createElement('div');
+    panel.className = 'modal-panel' + (t.key === activeTab ? ' active' : '');
+    panel.appendChild(renderPanel(t.key));
+    panelsEl.appendChild(panel);
+  });
+}
+
+function renderPanel(key){
+  const container = document.createElement('div');
+  const list = DB[key];
+
+  list.forEach((item, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'db-row';
+    const info = document.createElement('div');
+    info.className = 'info';
+    if(key === 'customers'){
+      info.innerHTML = '<div>' + escapeHtml(item.name) + '</div><div class="sub">' + escapeHtml(item.deliverLoc || '') + ' · ' + escapeHtml(item.payTerm || '') + '</div>';
+    }else if(key === 'products'){
+      info.innerHTML = '<div>' + escapeHtml(item.code) + '</div><div class="sub">' + escapeHtml(item.name) + '</div>';
+    }else{
+      info.textContent = item;
+    }
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'ลบ';
+    delBtn.onclick = ()=>{
+      list.splice(idx, 1);
+      saveDB();
+      buildModal();
+    };
+    row.appendChild(info);
+    row.appendChild(delBtn);
+    container.appendChild(row);
+  });
+
+  const addRow = document.createElement('div');
+  addRow.className = 'db-add';
+
+  if(key === 'customers'){
+    const nameI = mkAddInput('ชื่อลูกค้า');
+    const locI = mkAddInput('สถานที่ส่งสินค้า');
+    const termI = mkAddInput('เงื่อนไขชำระเงิน');
+    const addBtn = document.createElement('button');
+    addBtn.textContent = 'เพิ่ม';
+    addBtn.onclick = ()=>{
+      if(!nameI.value.trim()) return;
+      DB.customers.push({ name:nameI.value.trim(), deliverLoc:locI.value.trim(), payTerm:termI.value.trim() });
+      saveDB(); buildModal();
+    };
+    addRow.appendChild(nameI); addRow.appendChild(locI); addRow.appendChild(termI); addRow.appendChild(addBtn);
+  }else if(key === 'products'){
+    const codeI = mkAddInput('รหัสสินค้า');
+    const nameI = mkAddInput('รายการสินค้า');
+    const addBtn = document.createElement('button');
+    addBtn.textContent = 'เพิ่ม';
+    addBtn.onclick = ()=>{
+      if(!codeI.value.trim() || !nameI.value.trim()) return;
+      DB.products.push({ code:codeI.value.trim(), name:nameI.value.trim() });
+      saveDB(); buildModal();
+    };
+    addRow.appendChild(codeI); addRow.appendChild(nameI); addRow.appendChild(addBtn);
+  }else{
+    const valI = mkAddInput('เพิ่มรายการใหม่');
+    const addBtn = document.createElement('button');
+    addBtn.textContent = 'เพิ่ม';
+    addBtn.onclick = ()=>{
+      if(!valI.value.trim()) return;
+      if(!DB[key].includes(valI.value.trim())) DB[key].push(valI.value.trim());
+      saveDB(); buildModal();
+    };
+    addRow.appendChild(valI); addRow.appendChild(addBtn);
+  }
+
+  container.appendChild(addRow);
+  return container;
+}
+
+function mkAddInput(placeholder){
+  const i = document.createElement('input');
+  i.placeholder = placeholder;
+  return i;
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* =========================================================
+   ประวัติการจ่ายสินค้า (บันทึกแต่ละใบไว้ใน DB.records)
+   ========================================================= */
+// currentRecordId ใช้ติดตามว่า "กำลังแก้ไขใบเดิม" อยู่หรือไม่ (กันบันทึกซ้ำ
+// เวลากดพิมพ์/บันทึกซ้ำในใบเดียวกัน) โดยไม่พึ่งเลขที่เอกสาร เพราะผู้ใช้อาจ
+// ลืมเปลี่ยนเลขที่เอกสารตอนเริ่มใบใหม่ ซึ่งจะทำให้ใบใหม่ไปทับใบเก่าโดยไม่ตั้งใจ
+let currentRecordId = null;
+
+function collectSlipData(){
+  const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  return {
+    id: currentRecordId || ('r' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
+    savedAt: new Date().toISOString(),
+    docNo: getVal('docNo'),
+    issueCode: getVal('issueCode'),
+    issueDate: getVal('issueDate'), // yyyy-mm-dd
+    custName: getVal('custName'),
+    deliverLoc: getVal('deliverLoc'),
+    prodCode: getVal('prodCode'),
+    prodName: getVal('prodName'),
+    qty: parseFloat(getVal('qty')) || 0,
+    payTerm: getVal('payTerm'),
+    carrier: getVal('carrier'),
+    truckNo: getVal('truckNo'),
+    driver: getVal('driver'),
+    tOut: getVal('tOut'),
+    tArrive: getVal('tArrive'),
+    tStart: getVal('tStart'),
+    tEnd: getVal('tEnd')
+  };
+}
+
+// บันทึก: ถ้ากำลังแก้ไขใบเดิม (currentRecordId ตรงกับใบที่เคยบันทึกในเซสชันนี้)
+// จะอัปเดตของเดิม ไม่งั้นจะเพิ่มเป็นรายการใหม่เสมอ
+function saveRecord(){
+  const data = collectSlipData();
+  if(!data.issueDate){
+    alert('กรุณาระบุวันที่จ่ายสินค้าก่อนบันทึกประวัติ');
+    return null;
+  }
+  if(!DB.records) DB.records = [];
+  const idx = DB.records.findIndex(r => r.id === data.id);
+  if(idx >= 0){
+    DB.records[idx] = data;
+  }else{
+    DB.records.push(data);
+  }
+  currentRecordId = data.id;
+  saveDB();
+  return data;
+}
+
+function saveRecordWithFeedback(){
+  const data = saveRecord();
+  if(data) alert('บันทึกรายการนี้ในประวัติแล้ว');
+}
+
+function saveThenPrint(){
+  saveRecord();
+  window.print();
+}
+
+function toThaiDate(iso){
+  if(!iso) return '';
+  const parts = iso.split('-');
+  if(parts.length !== 3) return '';
+  const [y, m, d] = parts;
+  return d + '/' + m + '/' + y;
+}
+
+const MONTH_NAMES_TH = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+const HIST_TAB_DEFS = [
+  { key:'list',    label:'รายการทั้งหมด' },
+  { key:'daily',   label:'สรุปรายวัน' },
+  { key:'monthly', label:'สรุปรายเดือน' }
+];
+let activeHistTab = 'list';
+
+function openHistory(){
+  buildHistoryModal();
+  document.getElementById('historyModal').classList.add('open');
+}
+function closeHistory(){
+  document.getElementById('historyModal').classList.remove('open');
+}
+function clearHistFilter(){
+  document.getElementById('histFrom').value = '';
+  document.getElementById('histTo').value = '';
+  buildHistoryModal();
+}
+
+function getFilteredRecords(){
+  const from = document.getElementById('histFrom')?.value || '';
+  const to = document.getElementById('histTo')?.value || '';
+  return (DB.records || [])
+    .filter(r => r.issueDate)
+    .filter(r => (!from || r.issueDate >= from) && (!to || r.issueDate <= to))
+    .slice()
+    .sort((a, b) => b.issueDate.localeCompare(a.issueDate) || (b.savedAt||'').localeCompare(a.savedAt||''));
+}
+
+function buildHistoryModal(){
+  const tabsEl = document.getElementById('histTabs');
+  const panelsEl = document.getElementById('histPanels');
+  if(!tabsEl || !panelsEl) return;
+  tabsEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+
+  HIST_TAB_DEFS.forEach(t=>{
+    const btn = document.createElement('button');
+    btn.textContent = t.label;
+    if(t.key === activeHistTab) btn.classList.add('active');
+    btn.onclick = ()=>{ activeHistTab = t.key; buildHistoryModal(); };
+    tabsEl.appendChild(btn);
+  });
+
+  const panel = document.createElement('div');
+  panel.className = 'modal-panel active';
+  if(activeHistTab === 'list') panel.appendChild(renderHistList());
+  else panel.appendChild(renderHistSummary(activeHistTab === 'daily' ? 'daily' : 'monthly'));
+  panelsEl.appendChild(panel);
+}
+
+function renderHistList(){
+  const container = document.createElement('div');
+  const records = getFilteredRecords();
+  if(records.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'hist-empty';
+    empty.textContent = 'ยังไม่มีประวัติในช่วงที่เลือก';
+    container.appendChild(empty);
+    return container;
+  }
+  records.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'db-row hist-row';
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.innerHTML =
+      '<div>' + toThaiDate(r.issueDate) + ' · ' + escapeHtml(r.docNo || '-') + ' · ' + escapeHtml(r.custName || '') + '</div>' +
+      '<div class="sub">' + escapeHtml(r.prodName || '') + ' — ' + (r.qty || 0).toFixed(2) + ' ลบ.ม. · รถ ' + escapeHtml(r.truckNo || '-') + ' · ' + escapeHtml(r.driver || '-') + '</div>';
+    const btns = document.createElement('div');
+    btns.className = 'btns';
+    const loadBtn = document.createElement('button');
+    loadBtn.className = 'load';
+    loadBtn.textContent = 'โหลด';
+    loadBtn.onclick = ()=>{ loadRecordIntoForm(r); closeHistory(); };
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'ลบ';
+    delBtn.onclick = ()=>{
+      if(!confirm('ลบรายการนี้ออกจากประวัติ?')) return;
+      DB.records = DB.records.filter(x => x.id !== r.id);
+      saveDB();
+      buildHistoryModal();
+    };
+    btns.appendChild(loadBtn);
+    btns.appendChild(delBtn);
+    row.appendChild(info);
+    row.appendChild(btns);
+    container.appendChild(row);
+  });
+  return container;
+}
+
+function renderHistSummary(mode){
+  const container = document.createElement('div');
+  const records = getFilteredRecords();
+  if(records.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'hist-empty';
+    empty.textContent = 'ยังไม่มีประวัติในช่วงที่เลือก';
+    container.appendChild(empty);
+    return container;
+  }
+
+  const groups = {};
+  records.forEach(r=>{
+    const key = mode === 'daily' ? r.issueDate : r.issueDate.slice(0, 7);
+    if(!groups[key]) groups[key] = { count:0, qty:0, customers:new Set() };
+    groups[key].count += 1;
+    groups[key].qty += (parseFloat(r.qty) || 0);
+    if(r.custName) groups[key].customers.add(r.custName);
+  });
+  const keys = Object.keys(groups).sort().reverse();
+
+  let grandCount = 0, grandQty = 0;
+  const rowsHtml = keys.map(k=>{
+    const g = groups[k];
+    grandCount += g.count;
+    grandQty += g.qty;
+    let label;
+    if(mode === 'daily'){
+      label = toThaiDate(k);
+    }else{
+      const [y, m] = k.split('-');
+      label = MONTH_NAMES_TH[parseInt(m, 10)] + ' ' + y;
+    }
+    return '<tr><td>' + label + '</td><td class="num">' + g.count + '</td><td class="num">' + g.qty.toFixed(2) + '</td><td class="num">' + g.customers.size + '</td></tr>';
+  }).join('');
+
+  const table = document.createElement('table');
+  table.className = 'summary-table';
+  table.innerHTML =
+    '<thead><tr><th>' + (mode === 'daily' ? 'วันที่' : 'เดือน') + '</th><th class="num">จำนวนเที่ยว</th><th class="num">ปริมาณรวม (ลบ.ม.)</th><th class="num">จำนวนลูกค้า</th></tr></thead>' +
+    '<tbody>' + rowsHtml + '</tbody>' +
+    '<tfoot><tr><td>รวมทั้งหมด</td><td class="num">' + grandCount + '</td><td class="num">' + grandQty.toFixed(2) + '</td><td class="num">-</td></tr></tfoot>';
+  container.appendChild(table);
+  return container;
+}
+
+function loadRecordIntoForm(r){
+  const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = (val === undefined || val === null) ? '' : val; };
+  setVal('docNo', r.docNo);
+  setVal('issueCode', r.issueCode);
+  setVal('issueDate', r.issueDate);
+  setVal('custName', r.custName);
+  setVal('deliverLoc', r.deliverLoc);
+  setVal('prodCode', r.prodCode);
+  setVal('prodName', r.prodName);
+  setVal('qty', r.qty);
+  setVal('payTerm', r.payTerm);
+  setVal('carrier', r.carrier);
+  setVal('truckNo', r.truckNo);
+  setVal('driver', r.driver);
+  setVal('tOut', r.tOut);
+  setVal('tArrive', r.tArrive);
+  setVal('tStart', r.tStart);
+  setVal('tEnd', r.tEnd);
+  const issueDateDisplay = document.getElementById('issueDateDisplay');
+  if(issueDateDisplay){
+    issueDateDisplay.textContent = toThaiDate(r.issueDate || '');
+  }
+  fitProdNameText();
+}
+
+/* =========================================================
+   อื่นๆ
+   ========================================================= */
+function clearAll(){
+  document.querySelectorAll('#slipWrap input').forEach(el=>{
+    if(el.id === 'stampDate') return;
+    el.value = '';
+  });
+  const issueDateDisplay = document.getElementById('issueDateDisplay');
+  if(issueDateDisplay) issueDateDisplay.textContent = '';
+  fitProdNameText();
+}
+
+/* =========================================================
+   วันที่: ตัว input ยังเป็น type="date" ปกติของเบราว์เซอร์ (คลิกแล้วเปิด
+   ปฏิทินเลือกวันที่ได้เอง) แต่ซ่อนข้อความในตัวมันไว้ แล้ววาดข้อความ
+   ทับด้านบนเป็นรูปแบบ dd/mm/yyyy แทน
+   ========================================================= */
+function initDateField(realId, displayId){
+  const real = document.getElementById(realId);
+  const display = document.getElementById(displayId);
+  if(!real || !display) return;
+
+  function toThaiDisplay(iso){
+    if(!iso) return '';
+    const [y, m, d] = iso.split('-');
+    if(!y || !m || !d) return '';
+    return d + '/' + m + '/' + y;
+  }
+
+  function sync(){
+    display.textContent = toThaiDisplay(real.value);
+  }
+
+  real.addEventListener('change', sync);
+  real.addEventListener('input', sync);
+
+  sync();
+}
+
+/* =========================================================
+   ช่องรายการสินค้า: ลดขนาดตัวอักษรอัตโนมัติถ้าข้อความยาวเกินช่อง
+   จะได้ไม่ถูกตัด (แสดงครบทุกตัวอักษรเสมอ)
+   ========================================================= */
+function fitProdNameText(){
+  const el = document.getElementById('prodName');
+  if(!el) return;
+  const maxSize = 13.5;
+  const minSize = 9;
+  let size = maxSize;
+  el.style.fontSize = size + 'px';
+  while(el.scrollWidth > el.clientWidth && size > minSize){
+    size -= 0.5;
+    el.style.fontSize = size + 'px';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  initCombos();
+  initDateField('issueDate', 'issueDateDisplay');
+  const prodNameEl = document.getElementById('prodName');
+  if(prodNameEl){
+    prodNameEl.addEventListener('input', fitProdNameText);
+    fitProdNameText();
+  }
+  window.addEventListener('resize', fitProdNameText);
+});
+</script>
+
+</body>
+</html>
